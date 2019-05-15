@@ -1,0 +1,21 @@
+{
+  "presets": [
+    ["@babel/env", {
+      "targets": {
+        "browsers": ["last 2 versions"],
+        "node": "6"
+      },
+      "loose": true,
+      "useBuiltIns": false
+    }],
+    "@babel/typescript"
+  ],
+  "plugins": [
+    ["@babel/plugin-transform-runtime", {
+      "helpers": true,
+      "regenerator": false
+    }],
+    "@babel/proposal-class-properties",
+    "@babel/proposal-object-rest-spread"
+  ]
+}

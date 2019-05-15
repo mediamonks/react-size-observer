@@ -1,0 +1,94 @@
+{
+  "name": "react-size-observer",
+  "version": "0.1.0",
+  "description": "TODO",
+  "keywords": [],
+  "homepage": "https://www.mediamonks.com/",
+  "bugs": {
+    "url": "https://github.com/mediamonks/react-size-observer/issues"
+  },
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/mediamonks/react-size-observer.git"
+  },
+  "license": "MIT",
+  "author": "Floris Bernard <floris.bernard@gmail.com> (flut1)",
+  "main": "./index.js",
+  "types": "./index.d.ts",
+  "scripts": {
+    "build": "npm-run-all -s clean build:*",
+    "build:babel": "babel ./src -x \".ts\" -x \".js\" --out-dir ./",
+    "build:ts": "tsc -p ./tsconfig.build.json && shx cp -Rf decl/* .",
+    "clean": "npm-run-all clean:*",
+    "clean:npm": "shx rm -rf lib tmp index.js",
+    "clean:test": "shx rm -rf coverage",
+    "dev": "npm-run-all -p dev:*",
+    "dev:babel": "babel ./src -x \".ts\" --out-dir ./ --watch",
+    "dev:ts": "tsc --noEmit --allowJs --watch",
+    "lint": "npm-run-all lint:*",
+    "lint:js": "eslint src --ext .ts,.tsx --cache",
+    "lint:ts": "tslint src/**/*.ts -c tslint.json -p tsconfig.json -t verbose",
+    "precommit": "lint-staged",
+    "prepublishOnly": "npm-run-all -s validate build",
+    "prettify": "prettier --write \"src/**/*.{js,ts,json}\"",
+    "test": "jest",
+    "test:dev": "jest --watch",
+    "test:types": "npm run build:ts && dtslint test/types",
+    "validate": "npm-run-all -p lint test"
+  },
+  "lint-staged": {
+    "linters": {
+      "src/**/*.{js,ts,json}": [
+        "prettier --write",
+        "git add"
+      ],
+      "src/**/*.js": [
+        "npm run lint:js"
+      ],
+      "src/**/*.ts": [
+        "npm run lint:ts"
+      ]
+    }
+  },
+  "dependencies": {
+    "@babel/runtime": "^7.4.4",
+    "react": "^16.8.6"
+  },
+  "devDependencies": {
+    "@babel/cli": "^7.4.4",
+    "@babel/core": "^7.4.4",
+    "@babel/plugin-proposal-class-properties": "^7.4.4",
+    "@babel/plugin-proposal-object-rest-spread": "^7.4.4",
+    "@babel/plugin-transform-runtime": "^7.4.4",
+    "@babel/preset-env": "^7.4.4",
+    "@babel/preset-typescript": "^7.3.3",
+    "@babel/register": "^7.4.4",
+    "@types/jest": "^24.0.13",
+    "@types/react": "^16.8.17",
+    "@typescript-eslint/parser": "^1.9.0",
+    "coveralls": "^3.0.3",
+    "cross-env": "^5.2.0",
+    "dtslint": "^0.7.1",
+    "eslint": "^5.16.0",
+    "eslint-plugin-react-hooks": "^1.6.0",
+    "husky": "^2.3.0",
+    "jest": "^24.8.0",
+    "lint-staged": "^8.1.6",
+    "npm-run-all": "^4.1.5",
+    "prettier": "^1.17.1",
+    "shx": "^0.3.2",
+    "ts-jest": "^24.0.2",
+    "tslint": "^5.16.0",
+    "tslint-config-airbnb": "^5.11.1",
+    "tslint-config-prettier": "^1.18.0",
+    "tslint-react": "^4.0.0",
+    "tslint-react-hooks": "^2.1.0",
+    "typescript": "^3.4.5"
+  },
+  "peerDependencies": {
+    "react": ">=16.8.0"
+  },
+  "pre-push": [
+    "validate"
+  ]
+}

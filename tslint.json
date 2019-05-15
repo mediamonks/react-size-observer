@@ -1,0 +1,37 @@
+{
+  "extends": [
+    "tslint-config-airbnb",
+    "tslint-config-prettier",
+    "tslint-react",
+    "tslint-react-hooks"
+  ],
+  "defaultSeverity": "error",
+  "rules": {
+    "no-debugger": true,
+    "no-console": true,
+    "jsx-no-lambda": false,
+    "jsx-no-multiline-js": false,
+    "jsx-boolean-value": false,
+    "prefer-array-literal": [true, { "allow-type-parameters": true }],
+    "variable-name": [
+      true,
+      "ban-keywords",
+      "check-format",
+      "allow-pascal-case",
+      "allow-leading-underscore"
+    ],
+    "max-line-length": false,
+    "function-name": false,
+    "no-increment-decrement": false,
+    "ordered-imports": [
+      true,
+      {
+        "import-sources-order": "lowercase-last",
+        "named-imports-order": "lowercase-first"
+      }
+    ],
+    "strict-boolean-expressions": false,
+    "import-name": [false, {}],
+    "no-parameter-properties": true
+  }
+}
