@@ -1,6 +1,6 @@
 import { CSSProperties } from 'react';
 
-export const sizeObserverBreakpointStyles: CSSProperties = {
+export const sizeIndicatorStyles: CSSProperties = {
   position: 'absolute',
   top: 0,
   left: 0,

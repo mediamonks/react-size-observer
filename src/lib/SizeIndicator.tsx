@@ -1,16 +1,16 @@
 import React, { forwardRef, memo, CSSProperties, RefForwardingComponent } from 'react';
-import { sizeObserverBreakpointStyles } from './styles';
+import { sizeIndicatorStyles } from './styles';
 
-export interface BreakpointIndicatorProps {
+export interface SizeIndicatorProps {
   configKey: string;
   value: number;
 }
 
-const BreakpointIndicator: RefForwardingComponent<HTMLDivElement, BreakpointIndicatorProps> = (
+const SizeIndicator: RefForwardingComponent<HTMLDivElement, SizeIndicatorProps> = (
   { configKey, value },
   ref,
 ) => {
-  const style: CSSProperties = { ...sizeObserverBreakpointStyles };
+  const style: CSSProperties = { ...sizeIndicatorStyles };
   switch (configKey) {
     case 'minWidth':
       style.width = `${value}px`;
@@ -33,4 +33,4 @@ const BreakpointIndicator: RefForwardingComponent<HTMLDivElement, BreakpointIndi
   return <div ref={ref} style={style} />;
 };
 
-export default memo(forwardRef(BreakpointIndicator));
+export default memo(forwardRef(SizeIndicator));

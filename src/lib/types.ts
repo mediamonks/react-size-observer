@@ -1,6 +1,6 @@
 import { CSSProperties, FunctionComponent, ReactElement, ReactNode } from 'react';
 import { pseudoArrayMethods } from './createSizesConfig';
-import breakpointProperties from './breakpointProperties';
+import sizePropertyNames from './sizePropertyNames';
 
 type SizeObserverRenderProp<TSizeName extends string> = (
   breakpoint: number,
@@ -15,17 +15,14 @@ export interface SizeObserverProps<TSizeName extends string> {
   name?: string;
   style?: NullableProperties<CSSProperties>;
   className?: string;
-  // todo: add visual guides
-  // showGuides?: boolean;
+  renderWithoutActiveSize?: boolean;
 }
 
-export type BreakpointProperty = (typeof breakpointProperties)[number];
+export type SizeProperty = (typeof sizePropertyNames)[number];
 
-export type SizeExternalConfig = {
-  [P in BreakpointProperty]?: number;
-}
+export type SizePropertyMap = { [P in SizeProperty]?: number };
 
-export interface SizeConfig<TSizeName extends string> extends SizeExternalConfig {
+export interface SizeConfig<TSizeName extends string> extends SizePropertyMap {
   readonly name: TSizeName;
 }
 
@@ -37,7 +34,7 @@ export type SizesConfig<TSizeName extends string> = { readonly [K in TSizeName]:
 
 export interface SizeObserverContextValueEntry {
   sizes: SizesConfig<string>;
-  breakpoint: number;
+  activeSizeIndex: number;
 }
 
 export interface SizeObserverContextValue extends Partial<SizeObserverContextValueEntry> {

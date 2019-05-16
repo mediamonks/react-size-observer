@@ -19,6 +19,7 @@
     "build": "npm-run-all -s clean build:*",
     "build:babel": "babel ./src -x \".ts\" -x \".js\" --out-dir ./",
     "build:ts": "tsc -p ./tsconfig.build.json && shx cp -Rf decl/* .",
+    "check-types": "tsc -p ./tsconfig.json --noEmit",
     "clean": "npm-run-all clean:*",
     "clean:npm": "shx rm -rf lib tmp index.js",
     "clean:test": "shx rm -rf coverage",
@@ -43,10 +44,10 @@
         "git add"
       ],
       "src/**/*.js": [
-        "npm run lint:js"
+        "npm run lint:jslint"
       ],
       "src/**/*.ts": [
-        "npm run lint:ts"
+        "npm run lint:tslint"
       ]
     }
   },

@@ -1,9 +1,9 @@
-import { SizesConfig, SizeConfig, SizeExternalConfig } from './types';
+import { SizesConfig, SizeConfig, SizePropertyMap } from './types';
 
 export const pseudoArrayMethods = ['reduce', 'filter', 'map', 'forEach', 'some'] as const;
 
 type CreateSizesArgs<TSizeName extends string> = ReadonlyArray<
-  Readonly<[TSizeName, SizeExternalConfig?]>
+  Readonly<[TSizeName, SizePropertyMap?]>
 >;
 
 export default function createSizesConfig<TSizeName extends string>(
@@ -12,9 +12,9 @@ export default function createSizesConfig<TSizeName extends string>(
   const sizesConfig: any = {};
   const innerArray: Array<SizeConfig<TSizeName>> = [];
 
-  config.forEach(([name, sizeExternalConfig = {}], index) => {
+  config.forEach(([name, sizePropertyMap = {}], index) => {
     const sizeConfig: SizeConfig<TSizeName> = {
-      ...sizeExternalConfig,
+      ...sizePropertyMap,
       name,
     };
     innerArray.push(sizeConfig);

@@ -3,14 +3,14 @@ import DefaultContext from './DefaultContext';
 import { PackageConfig, SizeObserverContextValue } from './types';
 
 const defaultPackageConfig: PackageConfig = {
-  ContextProvider: ({ sizes, name, breakpoint, children }) => {
+  ContextProvider: ({ sizes, name, activeSizeIndex, children }) => {
     const currentContextValue = useContext(DefaultContext);
     const contextValueRef = useRef<SizeObserverContextValue>();
 
     useEffect(() => {
       const newContextValue = {
         sizes,
-        breakpoint,
+        activeSizeIndex,
         named: { ...currentContextValue.named },
       };
 
@@ -23,16 +23,16 @@ const defaultPackageConfig: PackageConfig = {
 
         newContextValue.named[name] = {
           sizes,
-          breakpoint,
+          activeSizeIndex,
         };
       }
 
       contextValueRef.current = newContextValue;
-    }, [sizes, name, breakpoint]);
+    }, [sizes, name, activeSizeIndex, currentContextValue.named]);
 
     return (
       <DefaultContext.Provider value={contextValueRef.current!}>
-        { children }
+        {children}
       </DefaultContext.Provider>
     )
   },
