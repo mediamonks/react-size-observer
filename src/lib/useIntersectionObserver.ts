@@ -1,4 +1,5 @@
 import { useCallback, useEffect, useRef, useState } from 'react';
+import useRefCallback from './useRefCallback';
 
 export type Omit<T, K extends keyof T> = Pick<
   T,
@@ -11,35 +12,30 @@ const useIntersectionObserver = (
   options: Omit<IntersectionObserverInit, 'root'>,
   allowNull = false,
 ) => {
-  const [observer, setObserver] = useState<IntersectionObserver | null>(null);
+  const observerRef = useRef<IntersectionObserver|null>(null);
   const observedElementsRef = useRef<Set<Element>>(new Set());
-  const callbackRef = useRef<IntersectionObserverCallback>(callback);
+  const proxiedCallback = useRefCallback(callback);
 
   useEffect(() => {
-    callbackRef.current = callback;
-  });
+    const { current: observedElements } = observedElementsRef;
 
-  useEffect(() => {
     if (root || allowNull) {
-      const newObserver = new IntersectionObserver((...args) => callbackRef.current(...args), {
+      const newObserver = new IntersectionObserver((...args) => proxiedCallback(...args), {
         root,
         ...options,
       });
 
-      for (const element of observedElementsRef.current.values()) {
-        newObserver.observe(element);
-      }
+      observedElementsRef.current.forEach(el => newObserver.observe(el));
 
-      setObserver(newObserver);
+
+      observerRef.current = newObserver;
     }
 
     return () => {
-      if (observer) {
-        for (const element of observedElementsRef.current.values()) {
-          observer.unobserve(element);
-        }
+      if (observerRef.current) {
+        observedElements.forEach(element => observerRef.current.unobserve(elemnent));
 
-        setObserver(null);
+        observerRef.current = null;
       }
     };
   }, [root]);
