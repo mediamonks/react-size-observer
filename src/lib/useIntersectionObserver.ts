@@ -1,5 +1,5 @@
 import { useCallback, useEffect, useRef, useState } from 'react';
-import useRefCallback from './useRefCallback';
+import useStableCallback from './useStableCallback';
 
 export type Omit<T, K extends keyof T> = Pick<
   T,
@@ -14,8 +14,9 @@ const useIntersectionObserver = (
 ) => {
   const observerRef = useRef<IntersectionObserver|null>(null);
   const observedElementsRef = useRef<Set<Element>>(new Set());
-  const proxiedCallback = useRefCallback(callback);
+  const proxiedCallback = useStableCallback(callback);
 
+  // causes a new IntersectionObserver to be created when
   useEffect(() => {
     const { current: observedElements } = observedElementsRef;
 
@@ -33,16 +34,17 @@ const useIntersectionObserver = (
 
     return () => {
       if (observerRef.current) {
-        observedElements.forEach(element => observerRef.current.unobserve(elemnent));
+        observedElements.forEach(element => observerRef.current!.unobserve(element));
 
         observerRef.current = null;
       }
     };
-  }, [root]);
+  }, [root, allowNull, options.rootMargin, JSON.stringify(options.threshold)]); // eslint-disable-line react-hooks/exhaustive-deps
 
   const observe = useCallback(
     (el: Element) => {
       const { current: observedElements } = observedElementsRef;
+      const { current: observer } = observerRef;
 
       if (!observedElements.has(el)) {
         if (observer) {
@@ -51,12 +53,13 @@ const useIntersectionObserver = (
         observedElements.add(el);
       }
     },
-    [observer],
+    [observerRef.current], // eslint-disable-line react-hooks/exhaustive-deps
   );
 
   const unobserve = useCallback(
     (el: Element) => {
       const { current: observedElements } = observedElementsRef;
+      const { current: observer } = observerRef;
 
       if (observedElements.has(el)) {
         if (observer) {
@@ -65,7 +68,7 @@ const useIntersectionObserver = (
         observedElements.delete(el);
       }
     },
-    [observer],
+    [observerRef.current], // eslint-disable-line react-hooks/exhaustive-deps
   );
 
   return [observe, unobserve];
