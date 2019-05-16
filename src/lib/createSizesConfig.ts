@@ -1,6 +1,6 @@
 import { SizesConfig, SizeConfig, SizeExternalConfig } from './types';
 
-export const pseudoArrayMethods = ['filter', 'map', 'forEach', 'some'] as const;
+export const pseudoArrayMethods = ['reduce', 'filter', 'map', 'forEach', 'some'] as const;
 
 type CreateSizesArgs<TSizeName extends string> = ReadonlyArray<
   Readonly<[TSizeName, SizeExternalConfig?]>

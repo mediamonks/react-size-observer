@@ -1,5 +1,6 @@
 import { CSSProperties, FunctionComponent, ReactElement, ReactNode } from 'react';
 import { pseudoArrayMethods } from './createSizesConfig';
+import breakpointProperties from './breakpointProperties';
 
 type SizeObserverRenderProp<TSizeName extends string> = (
   breakpoint: number,
@@ -18,11 +19,10 @@ export interface SizeObserverProps<TSizeName extends string> {
   // showGuides?: boolean;
 }
 
-export interface SizeExternalConfig {
-  minWidth?: number;
-  maxWidth?: number;
-  minHeight?: number;
-  maxHeight?: number;
+export type BreakpointProperty = (typeof breakpointProperties)[number];
+
+export type SizeExternalConfig = {
+  [P in BreakpointProperty]?: number;
 }
 
 export interface SizeConfig<TSizeName extends string> extends SizeExternalConfig {
