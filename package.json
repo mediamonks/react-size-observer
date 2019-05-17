@@ -17,7 +17,7 @@
   "types": "./index.d.ts",
   "scripts": {
     "build": "npm-run-all -s clean build:*",
-    "build:babel": "babel ./src -x \".ts\" -x \".js\" --out-dir ./",
+    "build:babel": "babel ./src -x \".ts\" -x \".tsx\" -x \".js\" --out-dir ./",
     "build:ts": "tsc -p ./tsconfig.build.json && shx cp -Rf decl/* .",
     "check-types": "tsc -p ./tsconfig.json --noEmit",
     "clean": "npm-run-all clean:*",
@@ -52,8 +52,7 @@
     }
   },
   "dependencies": {
-    "@babel/runtime": "^7.4.4",
-    "react": "^16.8.6"
+    "@babel/runtime": "^7.4.4"
   },
   "devDependencies": {
     "@babel/cli": "^7.4.4",
@@ -62,6 +61,7 @@
     "@babel/plugin-proposal-object-rest-spread": "^7.4.4",
     "@babel/plugin-transform-runtime": "^7.4.4",
     "@babel/preset-env": "^7.4.4",
+    "@babel/preset-react": "^7.0.0",
     "@babel/preset-typescript": "^7.3.3",
     "@babel/register": "^7.4.4",
     "@types/jest": "^24.0.13",
@@ -86,9 +86,7 @@
     "tslint-react-hooks": "^2.1.0",
     "typescript": "^3.4.5"
   },
-  "peerDependencies": {
-    "react": ">=16.8.0"
-  },
+  "peerDependencies": {},
   "pre-push": [
     "validate"
   ]

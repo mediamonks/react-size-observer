@@ -62,7 +62,7 @@ export default ({ ContextProvider }: PackageConfig = defaultPackageConfig) =>
         let mutated = false;
 
         entries.forEach(entry => {
-          const indicatorIndex = indicatorRefs.current.slice(sizePropertyState.length).findIndex(
+          const indicatorIndex = indicatorRefs.current.slice(0, sizePropertyState.length).findIndex(
             element => element === entry.target,
           );
 
@@ -104,7 +104,7 @@ export default ({ ContextProvider }: PackageConfig = defaultPackageConfig) =>
 
     // calculate the active indicator
     const activeSizeIndex = useMemo<number>(() => {
-      if (fullyIntersecting.slice(sizePropertyState.length).some(val => val === null)) {
+      if (fullyIntersecting.slice(0, sizePropertyState.length).some(val => val === null)) {
         return -1;
       }
 

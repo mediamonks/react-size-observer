@@ -1,4 +1,4 @@
-import { useCallback, useEffect, useRef, useState } from 'react';
+import { useCallback, useEffect, useRef } from 'react';
 import useStableCallback from './useStableCallback';
 
 export type Omit<T, K extends keyof T> = Pick<
@@ -12,7 +12,7 @@ const useIntersectionObserver = (
   options: Omit<IntersectionObserverInit, 'root'>,
   allowNull = false,
 ) => {
-  const observerRef = useRef<IntersectionObserver|null>(null);
+  const observerRef = useRef<IntersectionObserver | null>(null);
   const observedElementsRef = useRef<Set<Element>>(new Set());
   const proxiedCallback = useStableCallback(callback);
 
@@ -27,7 +27,6 @@ const useIntersectionObserver = (
       });
 
       observedElementsRef.current.forEach(el => newObserver.observe(el));
-
 
       observerRef.current = newObserver;
     }
