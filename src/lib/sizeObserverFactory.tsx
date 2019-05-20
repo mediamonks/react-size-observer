@@ -7,16 +7,15 @@ import { defaultWrapperStyles } from './styles';
 import { PackageConfig, SizeObserverProps } from './types';
 import useDefaultProperties from './useDefaultProperties';
 import useIntersectionObserver from './useIntersectionObserver';
+import useMemoRateLimited from './useMemoRateLimited';
 import useParameterizedCallback from './useParameterizedCallback';
-import useRateLimitEffect from './useRateLimitEffect';
 
 interface SizePropertyState extends SizeIndicatorProps {
   sizeIndex: number;
 }
 
-const RATE_LIMIT = 50;
-const RATE_LIMIT_INTERVAL = 5000;
-const RATE_LIMIT_ERROR = `SizeObserver updated more than ${RATE_LIMIT} times in ${RATE_LIMIT_INTERVAL}ms. There is probably an infinite loop in layout updates affecting the size of your element. To fix this, make sure the observed element's size does not change when you update layout.`;
+const RATE_LIMIT_PER_SECOND = 5;
+const RATE_LIMIT_WARNING = `SizeObserver updated more than ${RATE_LIMIT_PER_SECOND} times per second. Some updates where ignored to prevent recursion.`;
 
 export default ({ ContextProvider }: PackageConfig = defaultPackageConfig) =>
   function SizeObserver<TSizeName extends string>({
@@ -36,7 +35,9 @@ export default ({ ContextProvider }: PackageConfig = defaultPackageConfig) =>
     useEffect(() => {
       if (!renderWithoutActiveSize && !sizes.hasFallbackSize) {
         // tslint:disable-next-line no-console
-        console.warn('<SizeObserver />: You have no fallback size in the \'sizes\' prop, but renderWithoutActiveSize is not passed. This may cause your component not to render if none of the sizes match. ')
+        console.warn(
+          "<SizeObserver />: You have no fallback size in the 'sizes' prop, but renderWithoutActiveSize is not passed. This may cause your component not to render if none of the sizes match. ",
+        );
       }
     }, [sizes, renderWithoutActiveSize]);
 
@@ -69,32 +70,37 @@ export default ({ ContextProvider }: PackageConfig = defaultPackageConfig) =>
     );
 
     // create the callback that will be passed to IntersectionObserver
-    const observerCallback = useCallback<IntersectionObserverCallback>(entries => {
-      setFullyIntersecting(oldIntersecting => {
-        const newIntersecting = [...oldIntersecting];
-        let mutated = false;
+    const observerCallback = useCallback<IntersectionObserverCallback>(
+      entries => {
+        setFullyIntersecting(oldIntersecting => {
+          const newIntersecting = [...oldIntersecting];
+          let mutated = false;
 
-        entries.forEach(entry => {
-          const indicatorIndex = indicatorRefs.current.slice(0, sizePropertyState.length).findIndex(
-            element => element === entry.target,
-          );
+          entries.forEach(entry => {
+            const indicatorIndex = indicatorRefs.current
+              .slice(0, sizePropertyState.length)
+              .findIndex(element => element === entry.target);
 
-          if (indicatorIndex < 0) {
-            // tslint:disable-next-line no-console
-            console.error('Could not find IntersectionObserverEntry.target in indicatorRefs array');
-            return;
-          }
+            if (indicatorIndex < 0) {
+              // tslint:disable-next-line no-console
+              console.error(
+                'Could not find IntersectionObserverEntry.target in indicatorRefs array',
+              );
+              return;
+            }
 
-          const isFullyIntersecting = entry.intersectionRatio >= 1;
-          if (newIntersecting[indicatorIndex] !== isFullyIntersecting) {
-            newIntersecting[indicatorIndex] = isFullyIntersecting;
-            mutated = true;
-          }
+            const isFullyIntersecting = entry.intersectionRatio >= 1;
+            if (newIntersecting[indicatorIndex] !== isFullyIntersecting) {
+              newIntersecting[indicatorIndex] = isFullyIntersecting;
+              mutated = true;
+            }
+          });
+
+          return mutated ? newIntersecting : oldIntersecting;
         });
-
-        return mutated ? newIntersecting : oldIntersecting;
-      });
-    }, [sizePropertyState.length]);
+      },
+      [sizePropertyState.length],
+    );
 
     const [observe, unobserve] = useIntersectionObserver(observerCallback, wrapperElement, {
       threshold: 1,
@@ -116,41 +122,39 @@ export default ({ ContextProvider }: PackageConfig = defaultPackageConfig) =>
     );
 
     // calculate the active indicator
-    const activeSizeIndex = useMemo<number>(() => {
-      if (fullyIntersecting.slice(0, sizePropertyState.length).some(val => val === null)) {
+    const activeSizeIndex = useMemoRateLimited<number>(
+      () => {
+        if (fullyIntersecting.slice(0, sizePropertyState.length).some(val => val === null)) {
+          return -1;
+        }
+
+        // initialize an array that says all sizes match
+        const sizesAreMatching = sizes.map(() => true);
+
+        // if we find a property that doesn't match, set sizesAreMatching[size] to false
+        sizePropertyState.forEach((sizeProperty, index) => {
+          if (!sizePropertyIsMatch(sizeProperty, fullyIntersecting[index]!)) {
+            sizesAreMatching[sizeProperty.sizeIndex] = false;
+          }
+        });
+
+        for (let i = 0; i < sizesAreMatching.length; i++) {
+          if (sizesAreMatching[i]) {
+            return i;
+          }
+        }
+
         return -1;
-      }
-
-      // initialize an array that says all sizes match
-      const sizesAreMatching = sizes.map(() => true);
-
-      // if we find a property that doesn't match, set sizesAreMatching[size] to false
-      sizePropertyState.forEach(((sizeProperty, index) => {
-        if (!sizePropertyIsMatch(sizeProperty, fullyIntersecting[index]!)) {
-          sizesAreMatching[sizeProperty.sizeIndex] = false;
-        }
-      }));
-
-      for (let i = 0; i < sizesAreMatching.length; i++) {
-        if (sizesAreMatching[i]) {
-          return i;
-        }
-      }
-
-      return -1;
-    }, [fullyIntersecting, sizePropertyState, sizes]);
+      },
+      RATE_LIMIT_PER_SECOND,
+      1000,
+      () => console.warn(RATE_LIMIT_WARNING), // tslint:disable-line no-console
+      [fullyIntersecting, sizePropertyState, sizes],
+    );
 
     const wrapperStyle = useDefaultProperties(style, defaultWrapperStyles);
 
-    const shouldRender = renderWithoutActiveSize || (activeSizeIndex !== -1);
-
-    useRateLimitEffect(
-      RATE_LIMIT,
-      RATE_LIMIT_INTERVAL,
-      () => {
-        throw new Error(RATE_LIMIT_ERROR);
-      }
-    );
+    const shouldRender = renderWithoutActiveSize || activeSizeIndex !== -1;
 
     return (
       <div style={wrapperStyle} className={className} ref={setWrapperElement}>
