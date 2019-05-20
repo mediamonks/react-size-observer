@@ -36,7 +36,7 @@ export default ({ ContextProvider }: PackageConfig = defaultPackageConfig) =>
       if (!renderWithoutActiveSize && !sizes.hasFallbackSize) {
         // tslint:disable-next-line no-console
         console.warn(
-          "<SizeObserver />: You have no fallback size in the 'sizes' prop, but renderWithoutActiveSize is not passed. This may cause your component not to render if none of the sizes match. ",
+          "<SizeObserver />: You have no fallback size in the 'sizes' prop, but renderWithoutActiveSize is not passed. This may cause your component not to render if none of the sizes match.",
         );
       }
     }, [sizes, renderWithoutActiveSize]);

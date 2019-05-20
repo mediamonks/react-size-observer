@@ -1,13 +1,12 @@
-import React, { useContext, useEffect, useRef } from 'react';
+import React, { useContext, useMemo } from 'react';
 import DefaultContext from './DefaultContext';
-import { PackageConfig, SizeObserverContextValue } from './types';
+import { PackageConfig } from './types';
 
 const defaultPackageConfig: PackageConfig = {
   ContextProvider: ({ sizes, name, activeSizeIndex, children }) => {
     const currentContextValue = useContext(DefaultContext);
-    const contextValueRef = useRef<SizeObserverContextValue>();
 
-    useEffect(() => {
+    const contextValue = useMemo(() => {
       const newContextValue = {
         sizes,
         activeSizeIndex,
@@ -27,11 +26,11 @@ const defaultPackageConfig: PackageConfig = {
         };
       }
 
-      contextValueRef.current = newContextValue;
+      return newContextValue;
     }, [sizes, name, activeSizeIndex, currentContextValue.named]);
 
     return (
-      <DefaultContext.Provider value={contextValueRef.current!}>
+      <DefaultContext.Provider value={contextValue}>
         {children}
       </DefaultContext.Provider>
     )

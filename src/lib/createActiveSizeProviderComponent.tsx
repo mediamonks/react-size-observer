@@ -1,11 +1,5 @@
-import { ReactNode } from 'react';
 import defaultPackageConfig from './defaultPackageConfig';
-import { PackageConfig, SizesConfig } from './types';
-
-interface ActiveSizeProviderProps<TSizeName extends string> {
-  children: (activeSizeIndex: number, sizes: SizesConfig<TSizeName>) => ReactNode;
-  sizeObserver?: string;
-}
+import { ActiveSizeProviderProps, PackageConfig, SizesConfig } from './types';
 
 export default ({ useSizeObserverContext }: PackageConfig = defaultPackageConfig) =>
   function SizeProvider<TSizeName extends string = string>({

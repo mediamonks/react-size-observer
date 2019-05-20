@@ -22,6 +22,11 @@ export type SizeProperty = (typeof sizePropertyNames)[number];
 
 export type SizePropertyMap = { [P in SizeProperty]?: number };
 
+export interface ActiveSizeProviderProps<TSizeName extends string> {
+  children: (activeSizeIndex: number, sizes: SizesConfig<TSizeName>) => JSX.Element;
+  sizeObserver?: string;
+}
+
 export interface SizeConfig<TSizeName extends string> extends SizePropertyMap {
   readonly name: TSizeName;
 }
