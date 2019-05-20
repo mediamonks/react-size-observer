@@ -24,7 +24,7 @@
     "clean:npm": "shx rm -rf lib tmp index.js",
     "clean:test": "shx rm -rf coverage",
     "dev": "npm-run-all -p dev:*",
-    "dev:babel": "babel ./src -x \".ts\" --out-dir ./ --watch",
+    "dev:babel": "babel ./src -x \".ts\" -x \".tsx\" --out-dir ./ --watch",
     "dev:ts": "tsc --noEmit --allowJs --watch",
     "lint": "npm-run-all lint:*",
     "lint:eslint": "eslint src --ext .ts,.tsx --cache",
@@ -52,7 +52,8 @@
     }
   },
   "dependencies": {
-    "@babel/runtime": "^7.4.4"
+    "@babel/runtime": "^7.4.4",
+    "debounce": "^1.2.0"
   },
   "devDependencies": {
     "@babel/cli": "^7.4.4",
@@ -64,6 +65,7 @@
     "@babel/preset-react": "^7.0.0",
     "@babel/preset-typescript": "^7.3.3",
     "@babel/register": "^7.4.4",
+    "@types/debounce": "^1.2.0",
     "@types/jest": "^24.0.13",
     "@types/react": "^16.8.17",
     "@typescript-eslint/parser": "^1.9.0",

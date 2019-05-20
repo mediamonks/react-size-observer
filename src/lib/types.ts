@@ -30,6 +30,7 @@ export type SizesConfig<TSizeName extends string> = { readonly [K in TSizeName]:
   readonly [size: number]: SizeConfig<TSizeName>;
 } & { readonly [K in (typeof pseudoArrayMethods)[number]]: Array<SizeConfig<TSizeName>>[K] } & {
     readonly length: number;
+    readonly hasFallbackSize: boolean;
   };
 
 export interface SizeObserverContextValueEntry {
