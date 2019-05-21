@@ -1,4 +1,10 @@
-import { CSSProperties, FunctionComponent, ReactElement, ReactNode } from 'react';
+import {
+  CSSProperties,
+  FunctionComponent,
+  PropsWithChildren,
+  ReactElement,
+  ReactNode,
+} from 'react';
 import { pseudoArrayMethods } from './createSizesConfig';
 import sizePropertyNames from './sizePropertyNames';
 
@@ -22,8 +28,25 @@ export type SizeProperty = (typeof sizePropertyNames)[number];
 
 export type SizePropertyMap = { [P in SizeProperty]?: number };
 
-export interface ActiveSizeProviderProps<TSizeName extends string> {
-  children: (activeSizeIndex: number, sizes: SizesConfig<TSizeName>) => JSX.Element;
+export type SizeProviderCallback<TSizeName extends string = string> = (
+  activeSizeIndex: number,
+  sizes: SizesConfig<TSizeName>,
+) => JSX.Element;
+
+type SizeProp<TSizeName extends string = string> = { is: TSizeName } & { largerThan: TSizeName } & {
+  smallerThan: TSizeName;
+};
+
+export type SizeProps<TSizeName extends string = string> = {
+  children: JSX.Element | SizeProviderCallback<TSizeName>;
+} & SizeProp<TSizeName>;
+
+export interface ActiveSizeProviderProps<TSizeName extends string = string> {
+  children: SizeProviderCallback<TSizeName>;
+  sizeObserver?: string;
+}
+
+export interface LayoutSwitchProps<TSizeName extends string = string> {
   sizeObserver?: string;
 }
 
