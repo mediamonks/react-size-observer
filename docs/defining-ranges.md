@@ -170,6 +170,18 @@ const ranges = defineRanges(
 );
 ```
 
+#### Whitespace
+
+##### ✅ You can change the whitespace in the boundry strings
+
+```typescript
+const ranges = defineRanges(
+  ['tiny', '<10'],
+  ['10  >=  ', 'standard', '<    1000'],
+  ['1000>= ', 'enormous']
+);
+```
+
 #### Alternative units
 
 ##### ✅ You can explicitly postfix sizes with `px`
