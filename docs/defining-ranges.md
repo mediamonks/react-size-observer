@@ -16,9 +16,6 @@ const ranges = defineRanges(
 );
 ```
 
-The above example defines the following ranges:
-
-
 This function is quite strict about the syntax you use (if you want to know why, there's more info [below](#Syntax-rationale)). It is recommended that you copy this example, and change the ranges to suit your needs. You can change the following:
 
  - ✅ You can change the boundary sizes of the ranges
