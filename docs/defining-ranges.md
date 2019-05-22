@@ -48,7 +48,8 @@ const ranges = defineRanges(
 );
 ```
 
-> Why ❔ Removing the characters hurts readability. Without them, it is unclear what range should be active when the element size is exactly on one of the boundaries 
+> 🤔 \
+**Why?** Removing the characters hurts readability. Without them, it is unclear what range should be active when the element size is exactly on one of the boundaries 
 
 
 ##### ❌ You cannot use `>` and `<=` characters
@@ -62,7 +63,8 @@ const ranges = defineRanges(
 );
 ```
 
-> Why ❔ Due to technical limitations, `SizeObserver` cannot match "greater than" or "smaller than or equal to" conditions without degrading performance
+> 🤔 \
+**Why?** Due to technical limitations, `SizeObserver` cannot match "greater than" or "smaller than or equal to" conditions without degrading performance
 
 #### First and last range
 
@@ -84,7 +86,8 @@ const ranges = defineRanges(
 );
 ```
 
-> Why ❔ This will make sure that there is always an active range, even on very small or very large elements
+> 🤔 \
+**Why?** This will make sure that there is always an active range, even on very small or very large elements
 
 #### Range boundaries
 
@@ -108,7 +111,8 @@ const ranges = defineRanges(
 );
 ```
 
-> Why ❔ You may want to compare sizes, such as `if (activeRange >= ranges.small) { … }`. This only works if the ranges are in order
+> 🤔 \
+**Why?** You may want to compare sizes, such as `if (activeRange >= ranges.small) { … }`. This only works if the ranges are in order
 
 ##### ❌ You cannot leave gaps between the ranges
 In the following example there is a gap of 100px between the sizes `"small"` and `"medium"`:
@@ -120,7 +124,8 @@ const ranges = defineRanges(
 );
 ```
 
-> Why❔ Your code is most stable if `SizeObserver` always provides you with an active range. This is not possible if an element size is in a gap in between 2 ranges 
+> 🤔 \
+**Why?** Your code is most stable if `SizeObserver` always provides you with an active range. This is not possible if an element size is in a gap in between 2 ranges 
 
 ##### ❌ You cannot have overlap between the ranges
 In the following example there is overlap `"x-small"` and `"medium"`:
@@ -132,7 +137,8 @@ const ranges = defineRanges(
 );
 ```
 
-> Why ❔ It is ambiguous which range should be active on overlapping sizes 
+> 🤔 \
+**Why?** It is ambiguous which range should be active on overlapping sizes 
 
 #### Number or ranges
 
@@ -151,7 +157,8 @@ const ranges = defineRanges(
 );
 ```
 
-> Why ❔ There is no need for a `SizeObserver` if there is only one possible size
+> 🤔 \
+**Why?** There is no need for a `SizeObserver` if there is only one possible size
 
 #### Range names
 
@@ -216,7 +223,8 @@ const ranges = defineRanges(
 );
 ```
 
-> Why ❔ Because of how `SizeObserver` works under the hood, `%` sizes are relative to the observed element itself. This would mean that the active size is always `100%` 
+> 🤔 \
+**Why?** Because of how `SizeObserver` works under the hood, `%` sizes are relative to the observed element itself. This would mean that the active size is always `100%` 
 
 ##### ❌ You cannot mix units
 
@@ -227,4 +235,5 @@ const ranges = defineRanges(
 );
 ```
 
-> Why ❔ `SizeObserver` is unable to compare sizes of different units
+> 🤔 \
+**Why?** `SizeObserver` is unable to compare sizes of different units
