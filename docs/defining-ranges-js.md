@@ -9,10 +9,10 @@ Size ranges can be defined using the `defineRanges` utility. The function has th
 ```js
 defineRanges(
   'x_small < 600',
-  '600 > small <= 768',
-  '768 > medium <= 1024',
-  '1024 > large <= 1920',
-  '1920 > x-large',
+  '600 >= small < 768',
+  '768 >= medium < 1024',
+  '1024 >= large < 1920',
+  '1920 >= x-large',
 );
 ```
 
