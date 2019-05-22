@@ -71,18 +71,22 @@ const ranges = defineRanges(
 ##### ❌ You cannot include a lower bound on the first range
 ```typescript
 const ranges = defineRanges(
-  ['100 >=', 'small', '< 600'], // ❌ 
-  ['600 >=', 'medium', '< 1000'],
-  ['1000 >=', 'large']
+  ['100 >=', 'x-small', '< 600'], // ❌ 
+  ['600 >=', 'small', '< 768'],
+  ['768 >=', 'medium', '< 1024'],
+  ['1024 >=', 'large', '< 1920'],
+  ['1920 >=', 'x-large']
 );
 ```
 
 ##### ❌ You cannot include an upper bound on the last range
 ```typescript
 const ranges = defineRanges(
-  ['100 >=', 'small', '< 600'],
-  ['600 >=', 'medium', '< 1000'],
-  ['1000 >=', 'large'] // ❌ 
+  ['x-small', '< 600'],
+  ['600 >=', 'small', '< 768'],
+  ['768 >=', 'medium', '< 1024'],
+  ['1024 >=', 'large', '< 1920'],
+  ['1920 >=', 'x-large', '< 2000'] // ❌ 
 );
 ```
 
