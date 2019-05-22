@@ -20,8 +20,8 @@ This function is quite strict about the syntax you use (if you want to know why,
 
  - ✅ You can change the boundary sizes of the ranges
  - ✅ The amount of ranges can be 2 or larger
- - ✅ You can pick any size name you want
- - ✅ You can change the whitespace around the `<=` and `>` signs
+ - ✅ You can pick any sizes name you want
+ - ✅ You can change the whitespace around the `>=` and `<` signs
  - ✅ The numbers represent pixel values by default. You can instead add any CSS unit __except for %__
  
 Other changes will result in an error being thrown. 
