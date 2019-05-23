@@ -19,7 +19,7 @@ const ranges = defineRanges(
 This function is quite strict about the syntax you use (if you want to know why, there's more info [below](#Syntax-rationale)). It is recommended that you copy this example, and change the ranges to suit your needs. You can change the following:
 
  - ✅ You can change the boundary sizes of the ranges
- - ✅ The amount of ranges can be 2 or larger
+ - ✅ The amount of ranges can be 2 or more
  - ✅ You can pick any sizes name you want
  - ✅ You can change the whitespace around the `>=` and `<` signs
  - ✅ The numbers represent pixel values by default. You can instead add any CSS unit __except for %__
