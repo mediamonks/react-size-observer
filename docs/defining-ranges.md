@@ -20,14 +20,14 @@ This function is quite strict about the syntax you use (if you want to know why,
 
  - ✅ You can change the boundary sizes of the ranges
  - ✅ The amount of ranges can be 2 or more
- - ✅ You can pick any sizes name you want
+ - ✅ You can change the names of the ranges
  - ✅ You can change the whitespace around the `>=` and `<` signs
  - ✅ The numbers represent pixel values by default. You can instead add any CSS unit __except for %__
  
 Other changes will result in an error being thrown. 
 
 ### Syntax rationale
-You may wonder why `defineSizes` only accepts it's parameters in this exact format. There is some duplication here, so in theory there are shorter ways to declare the same ranges. 
+You may wonder why `defineRanges` only accepts it's parameters in this exact format. There is some duplication here, so in theory there are shorter ways to declare the same ranges. 
 
 The reason is that a shorter notation left room for interpretation, and was the cause of some confusion among users. This is most often the case when onboarding new developers, who may be unfamiliar with the syntax. For example, without the `<` and `>=` signs, it is not very clear if the numbers at the boundaries were part of the range or not.
 
@@ -116,7 +116,7 @@ const ranges = defineRanges(
 ```
 
 > 🤔 \
-**Why?** You may want to compare sizes, such as `if (activeRange >= ranges.small) { … }`. This only works if the ranges are in order
+**Why?** You may want to compare ranges, such as `if (activeRange >= ranges.small) { … }`. This only works if the ranges are in order
 
 ##### ❌ You cannot leave gaps between the ranges
 In the following example there is a gap of 100px between the sizes `"small"` and `"medium"`:
