@@ -1,0 +1,12 @@
+{
+  "extends": "./tsconfig.json",
+  "compilerOptions": {
+    "jsx": "react",
+    "isolatedModules": false
+  },
+  "include": [
+    "./src/**/*",
+    "./test/**/*",
+    "./types/**/*"
+  ]
+}

@@ -4,99 +4,169 @@ type DefineSizeRangesArgs<T> = [[T, string], ...Array<[string, T, string?]>];
 
 type StringifyRef = { current: string };
 
+class ValidationError extends Error {
+  constructor(message: string, public currentValue = '') {
+    super(message);
+
+    Object.setPrototypeOf(this, ValidationError.prototype);
+  }
+}
+
 const validator = <I, O, P extends Array<any> = []>(
   assert: (val: I, ...restArgs: P) => O,
-  beforeChildren: (val: O) => string = () => '',
-  childValidations: (val: O) => Array<(stringifyRef: StringifyRef) => any> = () => [],
-  afterChildren: (val: O) => string = () => '',
-) => (value: I, ...restArgs: P) => (stringifyRef: StringifyRef):O => {
-  let output: O;
-  output = assert(value, ...restArgs);
+  beforeChildren: (val: O, ...restArgs: P) => string = () => '',
+  childValidations: (
+    val: O,
+    ...restArgs: P
+  ) => Array<(stringifyRef: StringifyRef) => any> = () => [],
+  afterChildren: (val: O, ...restArgs: P) => string = () => '',
+) => (value: I, ...restArgs: P) => (stringifyRef: StringifyRef): O => {
+  const output: O = assert(value, ...restArgs);
 
-  stringifyRef.current += beforeChildren(output);
+  stringifyRef.current += beforeChildren(output, ...restArgs);
 
-  childValidations(output).forEach(validation => validation(stringifyRef));
+  childValidations(output, ...restArgs).forEach(validation => validation(stringifyRef));
 
-  stringifyRef.current += afterChildren(output);
+  stringifyRef.current += afterChildren(output, ...restArgs);
 
   return output;
 };
 
 const isName = validator(
-  (val: any) => {
+  (val: any, prependComma = true) => {
     if (typeof val === 'string') {
       return val;
     }
-    throw new Error('asdsad');
+    throw new ValidationError('asdsad');
   },
-  str => str,
+  (str, prependComma = true) => `${prependComma ? ', ' : ''}"${str}"`,
 );
 
 const isUpperBound = validator(
-  (val: any) => {
+  (val: any, prependComma = true) => {
     if (typeof val === 'string') {
-      if (/something/.test(val)) {
+      if (/^\s*<\s*[0-9]+(rem|em|px|vw|vh|vmin|vmax|ch|ex|cm|mm|in|pt|pc|q)?$/.test(val)) {
         return val;
       }
-      throw new Error('wefewfew');
+      throw new ValidationError(
+        `Expected an upper bound string, for example: "< 500"`,
+        `${prependComma ? ', ' : ''}"${val}"`,
+      );
     }
-    throw new Error('asdsad');
+    throw new ValidationError(`Expected an upper bound string, got type "${typeof val}"`);
   },
-  str => str,
+  (str, prependComma = true) => `${prependComma ? ', ' : ''}"${str}"`,
 );
 
-const isMaxLength = validator(
-  (val: Array<any>, length: number) => {
-    if (val.length > length) {
-      throw new Error('maxlength');
+const isLowerBound = validator(
+  (val: any, prependComma = true) => {
+    if (typeof val === 'string') {
+      if (/^[0-9]+(rem|em|px|vw|vh|vmin|vmax|ch|ex|cm|mm|in|pt|pc|q)?\s*>=\s*$/.test(val)) {
+        return val;
+      }
+      throw new ValidationError(
+        `Expected a lower bound string, for example: "123 >="`,
+        `${prependComma ? ', ' : ''}"${val}"`,
+      );
     }
-    return val;
-  }
+    throw new ValidationError(`Expected a lower bound string, got type "${typeof val}"`);
+  },
+  (str, prependComma = true) => `${prependComma ? ', ' : ''}"${str}"`,
 );
+
+const isMaxLength = validator((val: Array<any>, length: number) => {
+  if (val.length > length) {
+    throw new ValidationError('maxlength');
+  }
+  return val;
+});
 
 const isFirstRange = validator(
   (i: any) => {
     if (Array.isArray(i)) {
       return i;
     }
-    throw new Error('expected array');
+    throw new ValidationError('expected array');
   },
   () => '  [',
-  items => ([
-    isName(items[0]),
-    isUpperBound(items[1]),
-    isMaxLength(items, 2),
-  ]),
-  () => '],\n'
+  items => [isName(items[0], false), isUpperBound(items[1]), isMaxLength(items, 2)],
+  () => '],\n',
 );
 
+const isMiddleRange = validator(
+  (i: any) => {
+    if (Array.isArray(i)) {
+      return i;
+    }
+    throw new ValidationError('expected array');
+  },
+  () => '  [',
+  items => [
+    isLowerBound(items[0], false),
+    isName(items[1]),
+    isUpperBound(items[2]),
+    isMaxLength(items, 3),
+  ],
+  () => '],\n',
+);
+
+const isLastRange = validator(
+  (i: any) => {
+    if (Array.isArray(i)) {
+      return i;
+    }
+    throw new ValidationError('expected array');
+  },
+  () => '  [',
+  items => [isLowerBound(items[0], false), isName(items[1]), isMaxLength(items, 2)],
+  () => ']\n',
+);
 
 const isRangesArray = validator(
   (i: any) => {
     if (Array.isArray(i)) {
       if (i.length < 2) {
-        throw new Error('expecte darray lengtr 2')
+        throw new ValidationError('Expected at least 2 arguments to be passed');
       }
       return i;
     }
-    throw new Error('expected array');
+    throw new ValidationError('Expected arguments to be an array');
   },
-  () => '[\n',
-  items => items.map((item, index) => {
-    if (!index) {
-      return isFirstRange(item);
-    }
-    if (index === items.length - 1) {
-      return isLastRange(item);
-    }
+  () => '',
+  items =>
+    items.map((item, index) => {
+      if (!index) {
+        return isFirstRange(item);
+      }
+      if (index === items.length - 1) {
+        return isLastRange(item);
+      }
 
-    return isMiddleRange(item);
-  }),
-  () => '\n]',
+      return isMiddleRange(item);
+    }),
+  () => '\n)',
 );
 
+const GENERIC_ERROR = 'Invalid argument passed to defineSizeRanges:';
+const GENERIC_ERROR_POST = 'Check the documentation of defineSizeRanges for more info';
+
 function validateArgs<TSizeName extends string>(args: DefineSizeRangesArgs<TSizeName>) {
-  isRangesArray(args);
+  const stringifyRef = { current: 'defineSizeRanges(\n' };
+  try {
+    isRangesArray(args)(stringifyRef);
+  } catch (e) {
+    if (e instanceof ValidationError) {
+      const errorLines = stringifyRef.current.split('\n');
+      const errorColumn = errorLines[errorLines.length - 1].length;
+
+      throw new Error(
+        `${GENERIC_ERROR}\n${stringifyRef.current}${e.currentValue}\n${' '.repeat(errorColumn)}^${
+          e.message
+        }\n\n${GENERIC_ERROR_POST}`,
+      );
+    }
+    throw e;
+  }
 }
 
 export default function defineSizeRanges<TSizeName extends string>(
@@ -104,5 +174,5 @@ export default function defineSizeRanges<TSizeName extends string>(
 ): SizesConfig<TSizeName> {
   validateArgs(args);
 
-  return {};
+  return {} as any;
 }
