@@ -2,27 +2,57 @@ import { SizesConfig } from './types';
 
 type DefineSizeRangesArgs<T> = [[T, string], ...Array<[string, T, string?]>];
 
-
 type StringifyRef = { current: string };
 
-const validator = <I, O>(
-  assert: (val: I) => O,
-  before: string = '',
+const validator = <I, O, P extends Array<any> = []>(
+  assert: (val: I, ...restArgs: P) => O,
+  beforeChildren: (val: O) => string = () => '',
   childValidations: (val: O) => Array<(stringifyRef: StringifyRef) => any> = () => [],
-  after: string = '',
-) => (value: I) => (stringifyRef: StringifyRef):O => {
+  afterChildren: (val: O) => string = () => '',
+) => (value: I, ...restArgs: P) => (stringifyRef: StringifyRef):O => {
   let output: O;
-  output = assert(value);
+  output = assert(value, ...restArgs);
 
-  stringifyRef.current += before;
+  stringifyRef.current += beforeChildren(output);
 
   childValidations(output).forEach(validation => validation(stringifyRef));
 
-  stringifyRef.current += after;
+  stringifyRef.current += afterChildren(output);
 
   return output;
 };
 
+const isName = validator(
+  (val: any) => {
+    if (typeof val === 'string') {
+      return val;
+    }
+    throw new Error('asdsad');
+  },
+  str => str,
+);
+
+const isUpperBound = validator(
+  (val: any) => {
+    if (typeof val === 'string') {
+      if (/something/.test(val)) {
+        return val;
+      }
+      throw new Error('wefewfew');
+    }
+    throw new Error('asdsad');
+  },
+  str => str,
+);
+
+const isMaxLength = validator(
+  (val: Array<any>, length: number) => {
+    if (val.length > length) {
+      throw new Error('maxlength');
+    }
+    return val;
+  }
+);
 
 const isFirstRange = validator(
   (i: any) => {
@@ -31,11 +61,13 @@ const isFirstRange = validator(
     }
     throw new Error('expected array');
   },
-  '  [',
+  () => '  [',
   items => ([
-    
+    isName(items[0]),
+    isUpperBound(items[1]),
+    isMaxLength(items, 2),
   ]),
-  '],\n'
+  () => '],\n'
 );
 
 
@@ -49,7 +81,7 @@ const isRangesArray = validator(
     }
     throw new Error('expected array');
   },
-  '[\n',
+  () => '[\n',
   items => items.map((item, index) => {
     if (!index) {
       return isFirstRange(item);
@@ -60,7 +92,7 @@ const isRangesArray = validator(
 
     return isMiddleRange(item);
   }),
-  '\n]',
+  () => '\n]',
 );
 
 function validateArgs<TSizeName extends string>(args: DefineSizeRangesArgs<TSizeName>) {
