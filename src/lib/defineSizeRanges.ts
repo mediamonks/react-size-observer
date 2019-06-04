@@ -160,16 +160,22 @@ function tryStringify(input: unknown): string {
 
 const parserError = Symbol('parserError');
 
-type ParserCheckError = {
+type ParserError = {
+  [parserError]: true;
   errorMessage: string;
   errorValue?: string;
 };
 
-type ParserError = ParserCheckError & {
-  [parserError]: true;
-};
+const createParserError = (errorMessage: string, errorValue?: string): ParserError => ({
+  errorMessage,
+  errorValue,
+  [parserError]: true,
+});
 
 type ValueParsersArray = Array<ValueParser<any>>;
+type ValueParsersGetter<TOutput, TValueParsers extends ValueParsersArray> = (
+  output: TOutput,
+) => TValueParsers;
 type OutputOfValueParsers<T extends ValueParsersArray> = {
   [K in keyof T]: T[K] extends ValueParser<infer V> ? V : never
 };
@@ -187,23 +193,29 @@ type Parser<TInput, TOutput> = (
 //   getChildParsers?: (output: TOutput) => TValueParsers,
 // ) => Parser<TInput, TOutput>;
 
-type ParserCheckResult = [ParserCheckError | null, string?, string?];
-type ParserCheck<TInput> = (i: TInput) => ParserCheckResult;
+type ParserCheckResult<TOutput> = [ParserError | TOutput, string?, string?];
+type ParserCheck<TInput, TOutput> = (i: TInput) => ParserCheckResult<TOutput>;
 
 function isParserError(val: any): val is ParserError {
   return !!val[parserError];
 }
 
-const createParser = <TInput>(check: ParserCheck<TInput>) => <
+const createParser = <
+  TInput,
   TOutput extends TInput,
+  TFinalOutput extends TOutput,
   TValueParsers extends ValueParsersArray
 >(
-  getChildParsers?: (output: TOutput) => TValueParsers,
-): Parser<TInput, TOutput> => (value, parentHead = '', parentTail = '') => () => {
-  const [error, head = '', tail = ''] = check(value);
+  check: ParserCheck<TInput, TOutput>,
+) => (getChildParsers?: (output: TOutput) => TValueParsers): Parser<TInput, TFinalOutput> => (
+  value,
+  parentHead = '',
+  parentTail = '',
+) => () => {
+  const [result, head = '', tail = ''] = check(value);
 
-  if (error) {
-    const { errorMessage, errorValue } = error;
+  if (isParserError(result)) {
+    const { errorMessage, errorValue } = result;
     return [
       {
         errorMessage,
@@ -226,54 +238,65 @@ const createParser = <TInput>(check: ParserCheck<TInput>) => <
     }
   }
 
-  return [value as TOutput, `${stringified}${tail}${parentTail}`];
+  return [result as TFinalOutput, `${stringified}${tail}${parentTail}`];
 };
 
-const isArray = <TValueParsers extends ValueParsersArray>(length?: number) =>
-  createParser<unknown, OutputOfValueParsers<TValueParsers>, TValueParsers>(val => {
-    if (!Array.isArray(val)) {
-      return [{ errorMessage: 'Expected an array' }];
-    }
+const isArray = (length?: number) => ({
+  parser<TValueParsers extends ValueParsersArray>(
+    getChildParsers?: ValueParsersGetter<Array<any>, TValueParsers>,
+  ) {
+    return createParser<unknown, Array<any>, OutputOfValueParsers<TValueParsers>, TValueParsers>(
+      val => {
+        if (!Array.isArray(val)) {
+          return [createParserError('Expected an array')];
+        }
 
-    if (length !== undefined && val.length !== length) {
-      return [
-        {
-          errorMessage: `Expected an array of length ${length}, got ${val.length}`,
-          errorValue: '[',
-        },
-      ];
-    }
+        if (length !== undefined && val.length !== length) {
+          return [
+            createParserError(`Expected an array of length ${length}, got ${val.length}`, '['),
+          ];
+        }
 
-    return [null, '[', ']'];
-  });
+        return [val as OutputOfValueParsers<TValueParsers>, '[', ']'];
+      },
+    )(getChildParsers);
+  },
+});
 
-const isArgsArray = <TValueParsers extends ValueParsersArray>(minLength?: number) =>
-  createParser<unknown>(val => {
-    if (!Array.isArray(val)) {
-      return [{ errorMessage: 'Expected an array' }];
-    }
+const isArgsArray = <TValueParsers extends ValueParsersArray>(minLength?: number) => ({
+  parser<TValueParsers extends ValueParsersArray>(
+    getChildParsers?: ValueParsersGetter<Array<any>, TValueParsers>,
+  ) {
+    return createParser<unknown, Array<any>, OutputOfValueParsers<TValueParsers>, TValueParsers>(
+      val => {
+        if (!Array.isArray(val)) {
+          return [createParserError('Expected an array')];
+        }
 
-    if (minLength !== undefined && val.length < minLength) {
-      return [
-        {
-          errorMessage: `Expected at least ${length} number of arguments, got ${val.length}`,
-          errorValue: '(\n  ',
-        },
-      ];
-    }
+        if (minLength !== undefined && val.length < minLength) {
+          return [
+            createParserError(
+              `Expected at least ${length} number of arguments, got ${val.length}`,
+              '(\n  ',
+            ),
+          ];
+        }
 
-    return [null, '(\n', ')'];
-  });
+        return [val as OutputOfValueParsers<TValueParsers>, '(\n', ')'];
+      },
+    )(getChildParsers);
+  },
+});
 
 function validateArgs<TSizeName extends string>(args: DefineSizeRangesArgs<TSizeName>) {
-  const [result, stringified = ''] = isArgsArray(2)(a => {
-    const firstRangeParser = isArray(2)();
-    const midRangeParser = isArray(3)();
-    const lastRangeParser = isArray(2)();
+  const [result, stringified = ''] = isArgsArray(2).parser(a => {
+    const firstRangeParser = isArray(2).parser();
+    const midRangeParser = isArray(3).parser();
+    const lastRangeParser = isArray(2).parser();
 
     return [
       firstRangeParser(a[0], '  ', ',\n'),
-      ...a.slice(1, -1).map(arg => midRangeParser(arg, '  ', ',\n')),
+      ...a.slice(1, -1).map((arg: unknown) => midRangeParser(arg, '  ', ',\n')),
       lastRangeParser(a[a.length - 1], '  ', '\n'),
     ];
   })(args)();
