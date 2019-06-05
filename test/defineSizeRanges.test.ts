@@ -11,7 +11,7 @@ describe('defineSizeRanges()', () => {
     test('should error on no parameters', () => {
       const ranges = defineSizeRanges(
         ['x-small', '< 600'],
-        ['600 >=', 'small', '< 768'],
+        ['601 >=', 'small', '< 768'],
         ['768 >=', 'medium', '< 1024'],
         ['1024 >=', 'large', '< 1920'],
         ['1920 >=', 'x-large']
