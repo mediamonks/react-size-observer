@@ -206,7 +206,6 @@ function validateArgs<TSizeName extends string>(args: DefineSizeRangesArgs<TSize
     const firstRangeParser = isArray(2)(range => {
       return [() => isName()(range[0], '', ','), () => isUpperBound()(range[1], '', '')];
     });
-    const lastRangeParser = isArray(2)();
 
     return [
       () => firstRangeParser(a[0], '  ', ',\n'),
@@ -221,7 +220,14 @@ function validateArgs<TSizeName extends string>(args: DefineSizeRangesArgs<TSize
             ];
           })(arg, '  ', '\n');
       }),
-      () => lastRangeParser(a[a.length - 1], '  ', '\n'),
+      previousRanges =>
+        isArray(2)(range => {
+          const previousRange = previousRanges[a.length - 2];
+          return [
+            () => isLowerBound(previousRange[previousRange.length - 1])()(range[0], '', ','),
+            () => isName()(range[1], '', ','),
+          ];
+        })(a[a.length - 1], '  ', '\n'),
     ];
   })(args)();
 
@@ -238,6 +244,7 @@ function validateArgs<TSizeName extends string>(args: DefineSizeRangesArgs<TSize
   }
 
   console.log(stringified);
+  console.log(JSON.stringify(result, null, '  '));
 }
 
 export default function defineSizeRanges<TSizeName extends string>(
