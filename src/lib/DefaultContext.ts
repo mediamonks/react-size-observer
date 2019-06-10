@@ -1,7 +1,7 @@
-import React from 'react';
+import { createContext } from 'react';
 import { SizeObserverContextValue } from './types';
 
-const DefaultContext = React.createContext<SizeObserverContextValue>({
+const DefaultContext = createContext<SizeObserverContextValue>({
   named: {},
 });
 
